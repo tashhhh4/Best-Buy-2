@@ -80,10 +80,13 @@ class Product:
         """ Sets this product's status to inactive (`False`). """
         self.active = False
 
+    def get_promotion(self):
+        """ Returns the current promotion. """
+        return self.promotion
+
     def set_promotion(self, promotion):
         """ Applies a promotion on this product. """
         self.promotion = promotion
-
 
     def show(self):
         """ Prints an string representation of the product containing all of its basic info. """
