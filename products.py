@@ -1,7 +1,10 @@
 """ Best Buy - products.py """
 
 class ProductShortageError(Exception):
-    """ Raised when attempting to decrease a product's stock below zero. """
+    """ Raised when attempting to decrease a Product's stock below zero. """
+
+class ProductLimitError(Exception):
+    """ Raised when attempting to purchase too many of a limited Product. """
 
 
 # Formatting helper
@@ -102,6 +105,26 @@ class NonStockedProduct(Product):
     def buy(self, quantity):
         """ 'Buys' a product. Returns the total price given the desired quantity. """
         return quantity * self.price
+
+
+class LimitedProduct(Product):
+    """ A product with a per-order maximum limit. """
+
+    def __init__(self, name, price, quantity, maximum):
+        """ Initializes a LimitedProduct with the given 'maximum'. """
+        maximum = int(maximum)
+        self.maximum = maximum
+        super().__init__(name, price, quantity)
+
+    def show(self):
+        """ Prints a string representation of the product containing all of its basic info. """
+        print(stringify_product(self.name, self.price, self.quantity, limit=maximum))
+
+    def buy(self, quantity):
+        """ 'Buys' a product. Returns total price. Raises Exception if 'maximum' is exceeded. """
+        if quantity > self.maximum:
+            raise ProductLimitError(f"Error: Product '{self.name}' limited to {self.maximum} per order!")
+        super().buy(quantity)   
 
 
 # Run tests on the Product class
