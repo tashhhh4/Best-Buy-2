@@ -9,13 +9,14 @@ class ProductLimitError(Exception):
 
 # Formatting helper
 
-def stringify_product(name, price, quantity, limit=0):
+def stringify_product(name, price, quantity, limit=0, promotion=None):
     """ Returns a string representation of the product with the given parameters. """
     output = name
     output += f", Price: {round(price)}"
     if limit:
         output += f", Limited to {limit} per order!"
     output += f", Quantity: {quantity}"
+    output += f", Promotion: {promotion}"
     return output
 
 
@@ -40,6 +41,8 @@ class Product:
 
         self.active = quantity > 0
 
+        self.promotion = None
+
     def get_quantity(self):
         """ Returns the current quantity of this product. """
         return self.quantity
@@ -58,6 +61,13 @@ class Product:
         else:
             self.activate()
 
+    def decrease_quantity(self, amount):
+        """ Subtracts 'amount' from this Product's 'quantity'. """
+        if amount > self.quantity:
+            raise ProductShortageError()
+
+        self.set_quantity(self.quantity - amount)
+
     def is_active(self):
         """ Reports if this product is active. """
         return self.active
@@ -70,22 +80,34 @@ class Product:
         """ Sets this product's status to inactive (`False`). """
         self.active = False
 
+    def set_promotion(self, promotion):
+        """ Applies a promotion on this product. """
+        self.promotion = promotion
+
+
     def show(self):
         """ Prints an string representation of the product containing all of its basic info. """
-        print(stringify_product(self.name, self.price, self.quantity))
+        print(stringify_product(self.name, self.price, self.quantity, promotion=self.promotion))
 
     def buy(self, quantity):
         """ 'Buys' a product. Returns the total price given the desired quantity,
         and deducts the product from the store's total inventory. """
-        if self.quantity <= 0:
-            raise ProductShortageError(f"Product '{self.name}' is out of stock!")
-        if self.quantity < quantity:
+
+        if self.promotion:
+            total = self.promotion.apply_promotion(self, quantity)
+        else:
+            total = quantity * self.price
+
+        try:
+            self.decrease_quantity(quantity)
+        except ProductShortageError:
+            if self.quantity == 0:
+                raise ProductShortageError(f"Product '{self.name}' is out of stock!")
             raise ProductShortageError((f"Cannot buy {quantity} of product '{self.name}' "
-                                       f" with only {self.quantity} left in stock!"
+                                        f" with only {self.quantity} left in stock!"
             ))
 
-        self.set_quantity(self.quantity - quantity)
-        return quantity * self.price
+        return total
 
 
 class NonStockedProduct(Product):
@@ -100,11 +122,11 @@ class NonStockedProduct(Product):
     
     def show(self):
         """ Prints an string representation of the product containing all of its basic info. """
-        print(stringify_product(self.name, self.price, "Unlimited"))
+        print(stringify_product(self.name, self.price, "Unlimited", promotion=self.promotion))
 
-    def buy(self, quantity):
-        """ 'Buys' a product. Returns the total price given the desired quantity. """
-        return quantity * self.price
+    def decrease_quantity(self, quantity):
+        """ Overwrites the superclass logic to do nothing instead. """
+        pass
 
 
 class LimitedProduct(Product):
@@ -118,7 +140,7 @@ class LimitedProduct(Product):
 
     def show(self):
         """ Prints a string representation of the product containing all of its basic info. """
-        print(stringify_product(self.name, self.price, self.quantity, limit=self.maximum))
+        print(stringify_product(self.name, self.price, self.quantity, limit=self.maximum, promotion=self.promotion))
 
     def buy(self, quantity):
         """ 'Buys' a product. Returns total price. Raises Exception if 'maximum' is exceeded. """
