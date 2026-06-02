@@ -118,13 +118,13 @@ class LimitedProduct(Product):
 
     def show(self):
         """ Prints a string representation of the product containing all of its basic info. """
-        print(stringify_product(self.name, self.price, self.quantity, limit=maximum))
+        print(stringify_product(self.name, self.price, self.quantity, limit=self.maximum))
 
     def buy(self, quantity):
         """ 'Buys' a product. Returns total price. Raises Exception if 'maximum' is exceeded. """
         if quantity > self.maximum:
             raise ProductLimitError(f"Error: Product '{self.name}' limited to {self.maximum} per order!")
-        super().buy(quantity)   
+        return super().buy(quantity)
 
 
 # Run tests on the Product class

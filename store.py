@@ -43,9 +43,22 @@ class Store:
                 shopping_list :: tuple(products.Product, quantity)
         """
         total = 0
+        limited_products = {}
         for product, quantity in shopping_list:
             cost = product.buy(quantity)
+
+            if type(product) is products.LimitedProduct:
+                obj_id = id(product)
+                if obj_id not in limited_products:
+                    limited_products[obj_id] = quantity
+                else:
+                    limited_products[obj_id] += quantity
+
+                if limited_products[obj_id] > product.maximum:
+                    raise products.ProductLimitError(f"Error: Product '{product.name}' limited to {product.maximum} per order!")
+
             total += cost
+
         return total
 
 
