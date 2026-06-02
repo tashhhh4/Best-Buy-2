@@ -4,6 +4,18 @@ class ProductShortageError(Exception):
     """ Raised when attempting to decrease a product's stock below zero. """
 
 
+# Formatting helper
+
+def stringify_product(name, price, quantity, limit=0):
+    """ Returns a string representation of the product with the given parameters. """
+    output = name
+    output += f", Price: {round(price)}"
+    if limit:
+        output += f", Limited to {limit} per order!"
+    output += f", Quantity: {quantity}"
+    return output
+
+
 class Product:
     """ A product in the store inventory. """
 
@@ -57,7 +69,7 @@ class Product:
 
     def show(self):
         """ Prints an string representation of the product containing all of its basic info. """
-        print(f"{self.name}, Price: {round(self.price)}, Quantity: {self.quantity}")
+        print(stringify_product(self.name, self.price, self.quantity))
 
     def buy(self, quantity):
         """ 'Buys' a product. Returns the total price given the desired quantity,
@@ -70,6 +82,25 @@ class Product:
             ))
 
         self.set_quantity(self.quantity - quantity)
+        return quantity * self.price
+
+
+class NonStockedProduct(Product):
+    """ A non-physical product, such as software, which has an unlimited quantity. """
+
+    def __init__(self, name, price):
+        """ Initialize a new product with the given name and price.
+            Quantity is automatically set and kept at 0.
+        """
+        super().__init__(name, price, 0)
+        super().activate()
+    
+    def show(self):
+        """ Prints an string representation of the product containing all of its basic info. """
+        print(stringify_product(self.name, self.price, "Unlimited"))
+
+    def buy(self, quantity):
+        """ 'Buys' a product. Returns the total price given the desired quantity. """
         return quantity * self.price
 
 
