@@ -37,7 +37,7 @@ class PercentDiscount(Promotion):
         super().__init__(message)
 
     def apply_promotion(self, product, quantity):
-        final_price = product.price * quantity
+        final_price = (product.price - (self.percent / 100 * product.price)) * quantity
         return final_price
 
 
@@ -46,7 +46,12 @@ class SecondHalfPrice(Promotion):
     the second one gets half off. """
 
     def apply_promotion(self, product, quantity):
-        final_price = product.price * quantity
+        P = product.price
+        n = quantity
+        if n % 2 == 0: # Offset parallel linear functions
+            final_price = P * .75*n
+        else:
+            final_price = P * (.75*n + .25)
         return final_price
 
 
@@ -55,5 +60,11 @@ class ThirdOneFree(Promotion):
     the third one is free! """
 
     def apply_promotion(self, product, quantity):
-        final_price = product.price * quantity
+        P = product.price
+        n = quantity
+        M = n % 3
+        
+        # Three for the price of two
+        final_price = P * (2*n + M) / 3
+
         return final_price
