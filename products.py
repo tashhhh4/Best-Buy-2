@@ -40,6 +40,8 @@ class Product:
         self.quantity = quantity
         if self.quantity == 0:
             self.deactivate()
+        else:
+            self.activate()
 
     def is_active(self):
         """ Reports if this product is active. """
