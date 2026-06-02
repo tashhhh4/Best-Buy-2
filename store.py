@@ -1,4 +1,4 @@
-""" Best Buy - store.py """
+""" Best Buy 2 - store.py """
 
 import products
 

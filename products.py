@@ -1,4 +1,4 @@
-""" Best Buy - products.py """
+""" Best Buy 2 - products.py """
 
 class ProductShortageError(Exception):
     """ Raised when attempting to decrease a Product's stock below zero. """
